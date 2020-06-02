@@ -10,6 +10,7 @@ const logger = createLogger('createTodo');
 export const handler = middy(async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
   logger.info('Getting todo items ',event)
   const todos = await getTodos(event);
+
   return {
     statusCode: 200,
     body: JSON.stringify({

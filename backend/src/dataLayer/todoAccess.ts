@@ -23,11 +23,28 @@ export class TodoAccess {
             TableName: this.todosTable,
             IndexName: this.todosTableIndex,
             KeyConditionExpression: 'userId = :userId',
-            ExpressionAttributeValues:{
-                ':userId':userId
+            ExpressionAttributeValues: {
+                ':userId': userId
             }
         }).promise()
         return result.Items as TodoItem[]
+    }
+
+    async getTodo(todoId: string, userId: string): Promise<TodoItem> {
+        const todos = await this.docClient.query({
+            TableName: this.todosTable,
+            IndexName: this.todosTableIndex,
+            KeyConditionExpression: 'todoId = :todoId and userId = :userId',
+            ExpressionAttributeValues: {
+                ':todoId': todoId,
+                ':userId': userId
+            }
+        }).promise()
+        if(todos.Count == 0){
+            logger.error(`Error deleting non existing todo with id ${todoId}`)
+            return undefined
+        }
+        return todos.Items[0] as TodoItem
     }
 
     async createTodo(todoItem: TodoItem): Promise<TodoItem> {
@@ -36,7 +53,7 @@ export class TodoAccess {
         return todoItem
     }
 
-    async updateTodo(updateTodoRequest: UpdateTodoRequest,userId: string, todoId: string): Promise<TodoUpdate> {
+    async updateTodo(todoId: string, userId: string, updateTodoRequest: UpdateTodoRequest): Promise<TodoUpdate> {
         logger.info(`Updating todo by id: ${todoId}`);
         const updatedTodo = await this.docClient.update({
             TableName: this.todosTable,
@@ -44,7 +61,7 @@ export class TodoAccess {
                 "userId": userId,
                 "todoId": todoId
             },
-            UpdateExpression: 'set #namefield = :n, #dueDate = :d, #done = :done',
+            UpdateExpression: 'set #namefield = :namefield, #dueDate = :dueDate, #done = :done',
             ExpressionAttributeNames: {
                 "#namefield": "name",
                 "#dueDate": "dueDate",

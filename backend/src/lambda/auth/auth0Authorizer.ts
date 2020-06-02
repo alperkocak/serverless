@@ -58,7 +58,6 @@ export const handler = async (
 const tokenVerification = (authHeader: string): Promise<JwtPayload> => {
   return new Promise(async (resolve, reject) => {
     try {
-      //const token = parseJwtToken(authHeader);
       if (!authHeader)
         throw new Error('tokenVerification No authentication header')
       if (!authHeader.toLowerCase().startsWith('bearer ')){
@@ -81,3 +80,4 @@ const tokenVerification = (authHeader: string): Promise<JwtPayload> => {
     }
   });
 };
+
